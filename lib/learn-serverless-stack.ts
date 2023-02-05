@@ -6,7 +6,11 @@ export class LearnServerlessStack extends cdk.Stack {
   constructor(scope: Construct, id: string, props?: cdk.StackProps) {
     super(scope, id, props);
 
-    // The code that defines your stack goes here
+    // Provision a simple Lambda function
+    new cdk.aws_lambda_nodejs.NodejsFunction(this, 'myFirstLambdaFunction', {
+      entry: path.join(__dirname, 'myFirstLambda', 'handler.ts'),
+      handler: 'handler',
+    });
 
     // example resource
     // const queue = new sqs.Queue(this, 'LearnServerlessQueue', {
