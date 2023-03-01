@@ -37,5 +37,42 @@ export class LearnServerlessStack extends cdk.Stack {
     // Add a new GET /dice/:nbOfDices resource to the API Gateway
     // Corresponding to the invocation of the rollManyDices function
     diceResource.addResource('{nbOfDices}').addMethod('GET', new cdk.aws_apigateway.LambdaIntegration(rollDicesFunction));
+
+    const database = new cdk.aws_dynamodb.Table(this, 'myFirstDatabase', {
+      partitionKey: {
+        name: 'PK',
+        type: cdk.aws_dynamodb.AttributeType.STRING,
+      },
+      sortKey: {
+        name: 'SK',
+        type: cdk.aws_dynamodb.AttributeType.STRING,
+      },
+      billingMode: cdk.aws_dynamodb.BillingMode.PAY_PER_REQUEST,
+    });
+
+    const createNote = new cdk.aws_lambda_nodejs.NodejsFunction(this, 'createNote', {
+      entry: path.join(__dirname, 'createNote', 'handler.ts'),
+      handler: 'handler',
+      environment: {
+        TABLE_NAME: database.tableName,
+      },
+    });
+
+    database.grantWriteData(createNote);
+
+    const getNote = new cdk.aws_lambda_nodejs.NodejsFunction(this, 'getNote', {
+      entry: path.join(__dirname, 'getNote', 'handler.ts'),
+      handler: 'handler',
+      environment: {
+        TABLE_NAME: database.tableName,
+      },
+    });
+
+    database.grantReadData(getNote);
+
+    const userResource = myFirstApi.root.addResource('users').addResource('{userId}');
+    const notesResource = userResource.addResource('notes');
+    notesResource.addMethod('POST', new cdk.aws_apigateway.LambdaIntegration(createNote));
+    notesResource.addResource('{id}').addMethod('GET', new cdk.aws_apigateway.LambdaIntegration(getNote));
   }
 }
