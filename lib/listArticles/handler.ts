@@ -18,6 +18,7 @@ export const handler = async (): Promise<{ statusCode: number, body: string }> =
   const articles = Items.map(item => ({
     id: item.SK?.S,
     title: item.title?.S,
+    author: item.author?.S,
   }));
 
   return {

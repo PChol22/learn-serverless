@@ -6,10 +6,10 @@ const dynamoDBClient = new DynamoDBClient({});
 const s3Client = new S3Client({});
 
 export const handler = async (event: { body: string }): Promise<{ statusCode: number, body: string }> => {
-  const { title, content } = JSON.parse(event.body) as { title?: string, content?: string };
+  const { title, content, author } = JSON.parse(event.body) as { title?: string, content?: string, author?: string };
 
-  if (title === undefined || content === undefined) {
-    return Promise.resolve({ statusCode: 400, body: 'Missing title or content' });
+  if (title === undefined || content === undefined || author === undefined) {
+    return Promise.resolve({ statusCode: 400, body: 'Missing title, content or author' });
   }
 
   const id = uuidv4();
@@ -20,6 +20,7 @@ export const handler = async (event: { body: string }): Promise<{ statusCode: nu
       PK: { S: `article` },
       SK: { S: id },
       title: { S: title },
+      author: { S: author },
     }
   }));
 
